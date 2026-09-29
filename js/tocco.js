@@ -27,7 +27,7 @@
   // La schermata di avvio parla di tastiera e mouse: al telefono si dice altro.
   const comandi = document.querySelector('#avvio .comandi');
   if (comandi) comandi.innerHTML =
-    '<b>pollice sinistro</b>: trascina per camminare<br>' +
+    '<b>pollice destro</b>: trascina per camminare<br>' +
     'lo sguardo segue il passo &nbsp;·&nbsp; <b>❚❚</b> pausa<br>' +
     'a fine partita <b>↻</b> ricomincia &nbsp;·&nbsp; nel concerto <b>✕</b> esce<br>' +
     'con le <b>cuffie</b> — e il telefono <b>non in silenzioso</b>, altrimenti Safari tace';
@@ -99,7 +99,8 @@
   (function giro() { guardia(); requestAnimationFrame(giro); })();
 
   // ---------------------------------------------------------------------------
-  //  La levetta: nasce dove appoggi il pollice, nella meta' sinistra
+  //  La levetta: nasce dove appoggi il pollice, nella meta' destra
+  //  (a destra e non a sinistra: Gianluca, 30/09/2026)
   // ---------------------------------------------------------------------------
   //  Otto direzioni, come la tastiera: il gioco cammina a scatti di 45° e una
   //  levetta analogica prometterebbe una finezza che il passo non ha.
@@ -128,7 +129,7 @@
   strato.addEventListener('pointerdown', ev => {
     if (ev.target.closest('button')) return;
     ev.preventDefault();
-    if (dito !== null || ev.clientX > innerWidth / 2) { tocchi.add(ev.pointerId); return; }
+    if (dito !== null || ev.clientX < innerWidth / 2) { tocchi.add(ev.pointerId); return; }
     dito = ev.pointerId; ox = ev.clientX; oy = ev.clientY; mosso = false;
     try { strato.setPointerCapture(dito); } catch (e) {}
     levetta.style.left = ox + 'px'; levetta.style.top = oy + 'px';
@@ -180,6 +181,22 @@
       guardia();
     });
   });
+
+  // ---------------------------------------------------------------------------
+  //  Tutto lo schermo
+  // ---------------------------------------------------------------------------
+  //  Il canvas nasce 900x620 (circa 1,45), un iPhone in orizzontale e' circa
+  //  2,16. Invece di stirare o tagliare si allarga la finestra sul mondo:
+  //  l'altezza resta 620, la larghezza segue lo schermo, e ai lati si vede un
+  //  po' piu' di mappa. La telecamera legge cv.width a ogni fotogramma.
+  function adatta() {
+    const r = innerWidth / Math.max(1, innerHeight);
+    const l = Math.round(CONFIG.vista.finestra.altezza * Math.min(2.4, Math.max(1.2, r)));
+    if (cv.width !== l) cv.width = l;
+  }
+  adatta();
+  addEventListener('resize', adatta);
+  addEventListener('orientationchange', () => setTimeout(adatta, 250));
 
   // Il telefono non deve scorrere ne' ingrandire sotto le dita.
   document.addEventListener('gesturestart', e => e.preventDefault());

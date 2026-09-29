@@ -281,40 +281,39 @@ body.pannelli-chiusi #colonnaSinistra {
 body.da-giocare .solo-lavoro { display: none; }
 
 /* ---------- telefono e tablet: comandi a dito (js/tocco.js) ---------- */
-/* In orizzontale lo schermo e' basso: il canvas prende tutta l'altezza, la
-   barra di stato gli sta a sinistra in colonna e i pulsanti a destra, sotto
-   il pollice. Niente copre la mappa. Le zone sicure dell'iPhone (tacca, barra
-   della home) restano vuote: env(safe-area-inset-*) con viewport-fit=cover. */
+/* Il canvas prende tutto lo schermo: tocco.js allarga cv.width fino alla
+   proporzione dello schermo, cosi' si vede piu' mappa ai lati invece di
+   stirarla (Gianluca, 30/09/2026). Sopra, in trasparenza: i dati in alto a
+   sinistra, i pulsanti piccoli in alto a destra. La levetta nasce sotto il
+   pollice destro. Le zone sicure dell'iPhone (tacca, barra della home) le
+   copre solo la mappa, mai un comando: env(safe-area-inset-*). */
 #tocco { display: none; }
 body.tocco {
-  --lato: clamp(76px, 11vw, 120px);
+  --su: max(8px, env(safe-area-inset-top));
   --sx: max(10px, env(safe-area-inset-left));
   --dx: max(10px, env(safe-area-inset-right));
-  --cw: min(calc(100vw - var(--sx) - var(--dx) - 2 * var(--lato) - 28px),
-            calc((100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 8px) * 900 / 620));
   overscroll-behavior: none; -webkit-user-select: none; user-select: none;
   -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
   -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
 }
-body.tocco #app {
-  position: fixed; inset: 0; height: auto; gap: 0; align-items: center; justify-content: center;
-  padding: env(safe-area-inset-top) var(--dx) env(safe-area-inset-bottom) var(--sx);
-}
-body.tocco #colonnaSinistra {
-  flex: none; width: auto; margin: 0; display: flex; align-items: center; gap: 14px;
-}
-body.tocco #colonnaSinistra::after { content: ''; flex: none; width: var(--lato); }
+body.tocco #app { position: fixed; inset: 0; height: auto; padding: 0; gap: 0; }
+body.tocco #colonnaSinistra { position: static; width: auto; margin: 0; }
 body.tocco #avvisoMappa { display: none !important; }
-body.tocco canvas { flex: none; width: var(--cw); border: 0; border-radius: 0; }
+body.tocco canvas {
+  position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh;
+  object-fit: contain; border: 0; border-radius: 0;
+}
 body.tocco #legenda { display: none !important; }
 body.tocco #barraStato {
-  order: -1; flex: none; width: var(--lato); flex-direction: column; flex-wrap: nowrap;
-  align-items: stretch; gap: 10px; padding: 0; font-size: 11px; letter-spacing: .02em;
-  line-height: 1.25; overflow-wrap: anywhere;
+  position: fixed; z-index: 30; top: var(--su); left: var(--sx);
+  max-width: calc(100vw - var(--sx) - var(--dx) - 110px);
+  flex-wrap: wrap; align-items: baseline; gap: 4px 14px; padding: 5px 10px;
+  background: rgba(13,15,18,.45); border-radius: 8px; pointer-events: none;
+  font-size: 11px; letter-spacing: .02em; line-height: 1.25; opacity: .85;
 }
-body.tocco #barraStato .voce { flex-direction: column; align-items: flex-start; gap: 1px; }
-body.tocco #barraStato b { font-size: 15px; }
-body.tocco #barraStato #tempo { font-size: 20px; }
+body.tocco #barraStato b { font-size: 13px; }
+body.tocco #barraStato #tempo { font-size: 15px; }
+body.tocco #barraStato #fps { display: none; }
 body.tocco #tocco { display: block; position: fixed; inset: 0; z-index: 40; touch-action: none; }
 body.tocco #tocco[hidden] { display: none; }
 #levetta {
@@ -327,13 +326,12 @@ body.tocco #tocco[hidden] { display: none; }
   border-radius: 50%; background: rgba(216,221,227,.45);
 }
 #pulsantiTocco {
-  position: absolute; top: 50%; transform: translateY(-50%);
-  right: calc(var(--dx) + (var(--lato) - 56px) / 2);
-  display: flex; flex-direction: column; gap: 12px;
+  position: absolute; top: var(--su); right: var(--dx);
+  display: flex; flex-direction: row-reverse; gap: 8px;
 }
 #pulsantiTocco button {
-  width: 56px; height: 56px; border-radius: 50%; font-size: 22px; padding: 0;
-  background: rgba(29,34,48,.85); color: #d8dde3; border: 1px solid #3a4356;
+  width: 38px; height: 38px; border-radius: 50%; font-size: 15px; padding: 0;
+  background: rgba(29,34,48,.55); color: #d8dde3; border: 1px solid rgba(58,67,86,.7);
   font-family: -apple-system, "Helvetica Neue", sans-serif; line-height: 1;
 }
 #pulsantiTocco button[hidden] { display: none; }
