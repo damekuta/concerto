@@ -66,7 +66,7 @@
 
   const levetta = document.getElementById('levetta');
   const pomello = document.getElementById('pomello');
-  const RAGGIO = 56, MORTA = 12;
+  const RAGGIO = 40, MORTA = 8, BORDO = 16;
 
   // Fuori dal gioco (avvio, finestra delle segnalazioni) lo strato non c'e'.
   const inGioco = () => !document.getElementById('app').hidden;
@@ -130,7 +130,12 @@
     if (ev.target.closest('button')) return;
     ev.preventDefault();
     if (dito !== null || ev.clientX < innerWidth / 2) { tocchi.add(ev.pointerId); return; }
-    dito = ev.pointerId; ox = ev.clientX; oy = ev.clientY; mosso = false;
+    dito = ev.pointerId; mosso = false;
+    //  L'anello non nasce mai a cavallo del bordo: vicino al bordo il pollice
+    //  non avrebbe dove spingere e finirebbe fuori dallo schermo.
+    const m = RAGGIO + BORDO;
+    ox = Math.min(innerWidth - m, Math.max(m, ev.clientX));
+    oy = Math.min(innerHeight - m, Math.max(m, ev.clientY));
     try { strato.setPointerCapture(dito); } catch (e) {}
     levetta.style.left = ox + 'px'; levetta.style.top = oy + 'px';
     levetta.classList.add('attiva');
@@ -140,7 +145,14 @@
     if (ev.pointerId !== dito) return;
     let dx = ev.clientX - ox, dy = ev.clientY - oy;
     const d = Math.hypot(dx, dy);
-    if (d > RAGGIO) { dx *= RAGGIO / d; dy *= RAGGIO / d; }
+    //  Oltre il raggio l'anello segue il pollice invece di restare indietro:
+    //  cosi' per cambiare direzione basta un piccolo gesto, e il dito non
+    //  deve mai scivolare lontano (Gianluca, 30/09/2026: usciva dallo schermo).
+    if (d > RAGGIO) {
+      ox += dx * (1 - RAGGIO / d); oy += dy * (1 - RAGGIO / d);
+      levetta.style.left = ox + 'px'; levetta.style.top = oy + 'px';
+      dx *= RAGGIO / d; dy *= RAGGIO / d;
+    }
     if (d > MORTA) mosso = true;
     pomello.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
     applica(direzione(dx, dy));

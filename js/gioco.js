@@ -1045,6 +1045,7 @@ function muoviGiocatore(dt) {
   const vel = G.velocitaGiocatore * zavorra * spinta * frenoTrombettista();
 
   const px = dx * vel * dt, py = dy * vel * dt;
+  const x0 = giocatore.x, y0 = giocatore.y;
   if (libero(giocatore.x + px, giocatore.y, giocatore.r) && fraMobili(giocatore.x + px, giocatore.y)) giocatore.x += px;
   if (libero(giocatore.x, giocatore.y + py, giocatore.r) && fraMobili(giocatore.x, giocatore.y + py)) giocatore.y += py;
 
@@ -1053,7 +1054,9 @@ function muoviGiocatore(dt) {
   if (scia.length > 400) scia.length = 400;
   aggiornaSeguaci();
 
-  distanzaPasso += Math.hypot(px, py);
+  //  Contano i passi fatti davvero, non i tasti premuti: contro un muro si
+  //  sta fermi, e i passi tacciono (Gianluca, 30/09/2026).
+  distanzaPasso += Math.hypot(giocatore.x - x0, giocatore.y - y0);
   if (distanzaPasso > G.passoOgniPx) { distanzaPasso = 0; registra('passo', audio.suona('passo')); }
 }
 
