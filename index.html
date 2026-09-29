@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>CONCERTO</title>
+<link rel="stylesheet" href="stile.css">
+</head>
+<body>
+
+<div id="avvio">
+  <div class="box">
+    <h1>CONCERTO</h1>
+    <p class="sub">prototipo didattico di audio non lineare — Conservatorio di Avellino</p>
+    <p class="nota">
+      Cinque <b>pezzi</b> nascosti: non si vedono, <b>si sentono</b> — più ti
+      avvicini più suonano. Due <b>esche</b> suonano uguali ma non contano:
+      le distingue solo l'orecchio.<br><br>
+      Tre pezzi chiedono una <b>prova</b>: l'oggetto che serve dorme finché
+      non lo scopri.<br><br>
+      Il <b>tempo</b> scaduto non ferma la partita: peggiora — entra
+      <b>chi ti dà la caccia</b>, e la sua distanza si sente, non si vede.<br><br>
+      I pezzi presi ti <b>seguono</b> suonando scombinati e si allineano solo
+      in <b>anfiteatro</b>. Portarne tanti insieme copre il suono di quelli
+      che ti mancano.<br><br>
+      I due <b>cortili scoperti</b> sono scorciatoie, ma lì i pezzi non si
+      sentono.
+    </p>
+    <p class="comandi">
+      <b>frecce</b>/<b>WASD</b> muovono &nbsp;·&nbsp; <b>mouse</b> gira lo sguardo<br>
+      <b>Shift</b> + <b>←</b> <b>→</b> gira lo sguardo di 45° restando fermi<br>
+      <b>P</b> pausa &nbsp;·&nbsp; <span class="solo-lavoro"><b>L</b> modalità libera &nbsp;·&nbsp; </span><b>R</b> ricomincia &nbsp;·&nbsp; <b>N</b> giorno/notte<br>
+      <span class="solo-lavoro">in modalità libera: <b>M</b> musica · <b>I</b> inseguitore · <b>O</b> occlusione · <b>U</b> disturbo · <b>T</b> fa scadere il tempo · <b>V</b> laptop · <b>K</b> concerto finale</span>
+    </p>
+    <button id="btnAvvia">CLICCA PER INIZIARE</button>
+    <button id="btnNotte" type="button">☾ NOTTE</button>
+    <p class="micro">Il browser non permette di far partire l'audio senza un click.</p>
+  </div>
+</div>
+
+<div id="app" hidden>
+
+  <div id="colonnaSinistra">
+    <div id="avvisoMappa" hidden></div>
+    <canvas id="schermo"></canvas>
+
+    <div id="barraStato">
+      <span class="voce">tempo <b id="tempo">2:00</b></span>
+      <span class="voce">in anfiteatro <b id="punteggio">0/5</b></span>
+      <span class="voce">al seguito <b id="seguito">0</b></span>
+      <span class="voce" id="zona">—</span>
+      <span class="voce" id="segnoNotte" style="display:none">☾ <b>notte</b></span>
+      <span class="voce" id="stati"></span>
+      <button id="btnLibera" type="button" title="modalità libera (tasto L)">libera</button>
+      <span id="libera" hidden>MODALITÀ LIBERA</span>
+      <span id="fps"></span>
+    </div>
+
+    <div id="legenda">
+      <span class="voce"><i class="segno quadrato" style="background:#b08a4e"></i>oggetto della prova</span>
+      <span class="voce"><i class="segno rombo" style="background:#8f7fd0"></i>aiuto — toglie l'udito</span>
+      <span class="voce"><i class="segno rombo" style="background:#d0a83f"></i>aiuto — apre la pianta, e ti toglie la vista</span>
+      <span class="voce nota">le esche si disegnano identiche ai pezzi — le distingue solo l'orecchio</span>
+    </div>
+
+    <div id="pannelloStrumenti">
+      <div class="etichetta">I SUONI DEL MONDO
+        <small>volume e posizione in tempo reale — pezzi, esche, oggetti della prova</small></div>
+      <div id="listaSorgenti"></div>
+    </div>
+  </div>
+
+  <div id="colonnaDestra">
+    <div class="sezione">
+      <h2>Eventi <small>in diretta</small></h2>
+      <div id="log"></div>
+    </div>
+    <div class="sezione">
+      <h2>Banco di missaggio
+        <small>M silenzia · S isola · ▶ prova</small>
+        <button id="azzeraMix" title="rimetti tutto com'era">azzera</button>
+        <button id="salvaLivelli" title="scarica livelli.json: va nella cartella audio/">salva</button>
+      </h2>
+      <div id="banco"></div>
+    </div>
+
+    <div class="sezione">
+      <h2>File audio <small>trascina qui i tuoi</small></h2>
+      <div id="dropzone">
+        Trascina un file audio nella finestra.<br>
+        <b>Il nome del file decide dove finisce.</b>
+      </div>
+      <button id="scegliCartella" class="largo">carica la cartella audio…</button>
+      <input type="file" id="inputCartella" webkitdirectory directory multiple hidden>
+      <button id="svuotaArchivio" class="minuto">dimentica i file caricati</button>
+      <div id="listaFile"></div>
+    </div>
+
+    <div class="sezione">
+      <h2>Problemi <small>annotali, poi condividili</small></h2>
+      <button id="apriSegnala" class="largo">segnala un problema</button>
+    </div>
+  </div>
+</div>
+
+<div id="segnala" hidden>
+  <div class="finestra">
+    <h3>Segnala un problema</h3>
+    <p class="spiega">Descrivi cosa stavi facendo e cosa è successo. Il resto —
+      browser, sistema, stato della partita, ultimi eventi, file caricati —
+      lo allega il gioco da solo.</p>
+    <textarea id="testoSegnala" rows="5"
+      placeholder="Es. sono entrato nella stanza del pezzo 3, l'oggetto della prova si è svegliato ma non lo sentivo da nessuna parte"></textarea>
+    <div class="azioni">
+      <button id="copiaSegnala">copia negli appunti</button>
+      <button id="scaricaSegnala">scarica come file</button>
+      <button id="chiudiSegnala" class="tenue">chiudi</button>
+    </div>
+    <div id="esitoSegnala"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const v = location.protocol.startsWith('http') ? '?v=' + Date.now() : '';
+  ['js/config.js', 'js/mappa.js', 'js/sagome.js', 'js/audio.js', 'js/arredi.js', 'js/gioco.js', 'js/tocco.js'].forEach(function (s) {
+    const e = document.createElement('script');
+    e.src = s + v; e.async = false;
+    document.head.appendChild(e);
+  });
+})();
+</script>
+</body>
+</html>
