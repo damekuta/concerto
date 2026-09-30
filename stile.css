@@ -292,6 +292,7 @@ body.tocco {
   --su: max(8px, env(safe-area-inset-top));
   --sx: max(10px, env(safe-area-inset-left));
   --dx: max(10px, env(safe-area-inset-right));
+  --giu: max(10px, env(safe-area-inset-bottom));
   overscroll-behavior: none; -webkit-user-select: none; user-select: none;
   -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
   -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
@@ -317,14 +318,17 @@ body.tocco #barraStato #fps { display: none; }
 body.tocco #tocco { display: block; position: fixed; inset: 0; z-index: 40; touch-action: none; }
 body.tocco #tocco[hidden] { display: none; }
 #levetta {
-  position: absolute; width: 80px; height: 80px; margin: -40px 0 0 -40px;
-  border: 2px solid rgba(216,221,227,.35); border-radius: 50%; display: none;
+  position: absolute; width: 96px; height: 96px;
+  right: calc(var(--dx) + 14px); bottom: calc(var(--giu) + 14px);
+  border: 2px solid rgba(216,221,227,.22); border-radius: 50%;
+  background: rgba(13,15,18,.18); pointer-events: none;
 }
-#levetta.attiva { display: block; }
+#levetta.attiva { border-color: rgba(216,221,227,.45); }
 #pomello {
-  position: absolute; left: 50%; top: 50%; width: 38px; height: 38px;
-  border-radius: 50%; background: rgba(216,221,227,.45);
+  position: absolute; left: 50%; top: 50%; width: 42px; height: 42px;
+  border-radius: 50%; background: rgba(216,221,227,.32);
 }
+#levetta.attiva #pomello { background: rgba(216,221,227,.55); }
 #pulsantiTocco {
   position: absolute; top: var(--su); right: var(--dx);
   display: flex; flex-direction: row-reverse; gap: 8px;

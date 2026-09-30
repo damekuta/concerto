@@ -27,7 +27,7 @@
   // La schermata di avvio parla di tastiera e mouse: al telefono si dice altro.
   const comandi = document.querySelector('#avvio .comandi');
   if (comandi) comandi.innerHTML =
-    '<b>pollice destro</b>: trascina per camminare<br>' +
+    '<b>pollice destro</b> sul cerchio in basso: spingi per camminare<br>' +
     'lo sguardo segue il passo &nbsp;·&nbsp; <b>❚❚</b> pausa<br>' +
     'a fine partita <b>↻</b> ricomincia &nbsp;·&nbsp; nel concerto <b>✕</b> esce<br>' +
     'con le <b>cuffie</b> — e il telefono <b>non in silenzioso</b>, altrimenti Safari tace';
@@ -66,7 +66,7 @@
 
   const levetta = document.getElementById('levetta');
   const pomello = document.getElementById('pomello');
-  const RAGGIO = 40, MORTA = 8, BORDO = 16;
+  const RAGGIO = 48, MORTA = 10, BORDO = 14;
 
   // Fuori dal gioco (avvio, finestra delle segnalazioni) lo strato non c'e'.
   const inGioco = () => !document.getElementById('app').hidden;
@@ -99,13 +99,27 @@
   (function giro() { guardia(); requestAnimationFrame(giro); })();
 
   // ---------------------------------------------------------------------------
-  //  La levetta: nasce dove appoggi il pollice, nella meta' destra
-  //  (a destra e non a sinistra: Gianluca, 30/09/2026)
+  //  La levetta: ferma, in basso a destra, sempre visibile
   // ---------------------------------------------------------------------------
+  //  Prima nasceva dove si appoggiava il pollice, poi seguiva il pollice: in
+  //  tutti e due i casi il dito scivolava verso l'esterno e usciva dallo
+  //  schermo (Gianluca, 30/09/2026, due volte). Ora il centro non si muove
+  //  mai: il pollice ha un punto a cui tornare, e allargarsi non cambia
+  //  niente — conta solo da che parte del centro sta il dito.
+  //  Basta appoggiare il pollice in qualunque punto della meta' destra.
+  //
   //  Otto direzioni, come la tastiera: il gioco cammina a scatti di 45° e una
   //  levetta analogica prometterebbe una finezza che il passo non ha.
-  let dito = null, ox = 0, oy = 0, premuti = new Set(), mosso = false;
+  let dito = null, ox = 0, oy = 0, ax = 0, ay = 0, premuti = new Set(), mosso = false;
   const tocchi = new Set();      // dita appoggiate fuori dalla levetta
+
+  //  Il posto lo decide stile.css (dentro le zone sicure dell'iPhone): qui
+  //  se ne legge solo il centro.
+  function centro() {
+    const r = levetta.getBoundingClientRect();
+    ox = r.left + r.width / 2; oy = r.top + r.height / 2;
+  }
+  centro();
 
   function direzione(dx, dy) {
     const d = Math.hypot(dx, dy);
@@ -119,6 +133,13 @@
     for (const k of nuovi) if (!premuti.has(k)) tasto('keydown', k);
     premuti = nuovi;
   }
+  function spingi(x, y) {
+    let dx = x - ox, dy = y - oy;
+    const d = Math.hypot(dx, dy);
+    if (d > RAGGIO) { dx *= RAGGIO / d; dy *= RAGGIO / d; }
+    pomello.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+    applica(direzione(dx, dy));
+  }
 
   //  Un tocco senza trascinare fa quello che fa un tasto qualsiasi (chiude il
   //  foglio del direttore); in pausa riprende, come dice il foglio.
@@ -130,32 +151,18 @@
     if (ev.target.closest('button')) return;
     ev.preventDefault();
     if (dito !== null || ev.clientX < innerWidth / 2) { tocchi.add(ev.pointerId); return; }
-    dito = ev.pointerId; mosso = false;
-    //  L'anello non nasce mai a cavallo del bordo: vicino al bordo il pollice
-    //  non avrebbe dove spingere e finirebbe fuori dallo schermo.
-    const m = RAGGIO + BORDO;
-    ox = Math.min(innerWidth - m, Math.max(m, ev.clientX));
-    oy = Math.min(innerHeight - m, Math.max(m, ev.clientY));
+    centro();
+    dito = ev.pointerId; mosso = false; ax = ev.clientX; ay = ev.clientY;
     try { strato.setPointerCapture(dito); } catch (e) {}
-    levetta.style.left = ox + 'px'; levetta.style.top = oy + 'px';
     levetta.classList.add('attiva');
-    pomello.style.transform = 'translate(-50%, -50%)';
+    //  Il dito appoggiato vicino al centro non muove niente finche' non si
+    //  sposta: cosi' un tocco per chiudere il foglio non fa fare un passo.
+    if (Math.hypot(ax - ox, ay - oy) <= RAGGIO * 1.6) spingi(ax, ay);
   });
   strato.addEventListener('pointermove', ev => {
     if (ev.pointerId !== dito) return;
-    let dx = ev.clientX - ox, dy = ev.clientY - oy;
-    const d = Math.hypot(dx, dy);
-    //  Oltre il raggio l'anello segue il pollice invece di restare indietro:
-    //  cosi' per cambiare direzione basta un piccolo gesto, e il dito non
-    //  deve mai scivolare lontano (Gianluca, 30/09/2026: usciva dallo schermo).
-    if (d > RAGGIO) {
-      ox += dx * (1 - RAGGIO / d); oy += dy * (1 - RAGGIO / d);
-      levetta.style.left = ox + 'px'; levetta.style.top = oy + 'px';
-      dx *= RAGGIO / d; dy *= RAGGIO / d;
-    }
-    if (d > MORTA) mosso = true;
-    pomello.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-    applica(direzione(dx, dy));
+    if (Math.hypot(ev.clientX - ax, ev.clientY - ay) > MORTA) mosso = true;
+    if (mosso || Math.hypot(ax - ox, ay - oy) <= RAGGIO * 1.6) spingi(ev.clientX, ev.clientY);
   });
   //  Il tocco scatta quando il dito si alza e non quando si appoggia: su iOS
   //  l'audio si riprende solo dentro touchend/click, non dentro touchstart.
@@ -165,6 +172,7 @@
     dito = null;
     applica(new Set());
     levetta.classList.remove('attiva');
+    pomello.style.transform = 'translate(-50%, -50%)';
     if (!mosso && ev.type === 'pointerup') tocco();
   }
   strato.addEventListener('pointerup', lascia);
