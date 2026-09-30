@@ -66,11 +66,11 @@
 
   const levetta = document.getElementById('levetta');
   const pomello = document.getElementById('pomello');
-  //  Piu' sensibile (Gianluca, 30/09/2026: «si deve muovere troppo il dito»):
-  //  bastano 4 px per partire e l'anello segue il pollice gia' a 22 px, cosi'
+  //  Piu' sensibile (Gianluca, 30/09/2026, due volte: «si deve muovere troppo il dito»):
+  //  bastano 3 px per partire e l'anello segue il pollice gia' a 15 px, cosi'
   //  per cambiare direzione basta un gesto corto. TOCCO_FERMO resta piu'
   //  largo: un tocco appena tremolante deve contare ancora come tocco.
-  const RAGGIO = 22, MORTA = 4, BORDO = 16, TOCCO_FERMO = 8;
+  const RAGGIO = 15, MORTA = 3, BORDO = 16, TOCCO_FERMO = 8;
 
   // Fuori dal gioco (avvio, finestra delle segnalazioni) lo strato non c'e'.
   const inGioco = () => !document.getElementById('app').hidden;
