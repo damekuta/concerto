@@ -27,7 +27,8 @@
   // La schermata di avvio parla di tastiera e mouse: al telefono si dice altro.
   const comandi = document.querySelector('#avvio .comandi');
   if (comandi) comandi.innerHTML =
-    '<b>Pollice destro</b> per camminare &nbsp;·&nbsp; <b>❚❚</b> pausa &nbsp;·&nbsp; meglio con le <b>cuffie</b>';
+    '<b>Pollice destro</b> per camminare &nbsp;·&nbsp; <b>❚❚</b> pausa' +
+    '<span class="cuffie">(meglio con le <b>cuffie</b>)</span>';
   const avvia = document.getElementById('btnAvvia');
   if (avvia) avvia.textContent = 'TOCCA PER INIZIARE';
   const micro = document.querySelector('#avvio .micro');

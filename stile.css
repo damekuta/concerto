@@ -17,6 +17,10 @@ body {
 #avvio .box { text-align: center; max-width: 430px; padding: 30px 30px 40px; }
 #avvio h1 { font-size: 40px; letter-spacing: .22em; margin: 0; font-weight: 300; line-height: 1.15; }
 /* «al Conservatorio» a riga sua e piu' piccolo: il titolo lungo usciva dalla colonna (01/10/2026) */
+/* una frase per riga, a capo dopo la punteggiatura (Gianluca, 01/10/2026) */
+#avvio .nota .riga { display: block; }
+#avvio .nota .stacco { display: block; height: .9em; }
+#avvio .comandi .cuffie { display: block; margin-top: 4px; }
 #avvio h1 .titolo2 { font-size: .5em; letter-spacing: .2em; }
 #avvio .sub { color: #6f7a86; letter-spacing: .08em; margin: 6px 0 28px; }
 #avvio .nota { color: #9aa5b1; margin-bottom: 18px; line-height: 1.7; }
