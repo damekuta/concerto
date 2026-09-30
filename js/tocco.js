@@ -27,14 +27,11 @@
   // La schermata di avvio parla di tastiera e mouse: al telefono si dice altro.
   const comandi = document.querySelector('#avvio .comandi');
   if (comandi) comandi.innerHTML =
-    '<b>pollice destro</b>: trascina per camminare<br>' +
-    'lo sguardo segue il passo &nbsp;·&nbsp; <b>❚❚</b> pausa<br>' +
-    'a fine partita <b>↻</b> ricomincia &nbsp;·&nbsp; nel concerto <b>✕</b> esce<br>' +
-    'con le <b>cuffie</b> — e il telefono <b>non in silenzioso</b>, altrimenti Safari tace';
+    '<b>Pollice destro</b> per camminare &nbsp;·&nbsp; <b>❚❚</b> pausa &nbsp;·&nbsp; meglio con le <b>cuffie</b>';
   const avvia = document.getElementById('btnAvvia');
   if (avvia) avvia.textContent = 'TOCCA PER INIZIARE';
   const micro = document.querySelector('#avvio .micro');
-  if (micro) micro.textContent = 'Il telefono non fa partire l\'audio senza un tocco.';
+  if (micro) micro.hidden = true;   // testo corto: si arriva allo start senza scorrere
 
   // ---------------------------------------------------------------------------
   //  Tasti finti
@@ -67,11 +64,11 @@
   const levetta = document.getElementById('levetta');
   const pomello = document.getElementById('pomello');
   //  Piu' sensibile (Gianluca, 30/09/2026, due volte: «si deve muovere troppo il dito»):
-  //  terzo giro, cambio drastico: 1,5 px per partire, l'anello segue il
-  //  pollice gia' a 6 px, cosi'
+  //  terzo giro drastico (1,5/6 px) sbandava nei corridoi: si torna indietro
+  //  di un quarto, 2 px per partire e anello che segue a 8 px. Definitivo. Cosi'
   //  per cambiare direzione basta un gesto corto. TOCCO_FERMO resta piu'
   //  largo: un tocco appena tremolante deve contare ancora come tocco.
-  const RAGGIO = 6, MORTA = 1.5, BORDO = 16, TOCCO_FERMO = 8, VISTA = 15;
+  const RAGGIO = 8, MORTA = 2, BORDO = 16, TOCCO_FERMO = 8, VISTA = 15;
 
   // Fuori dal gioco (avvio, finestra delle segnalazioni) lo strato non c'e'.
   const inGioco = () => !document.getElementById('app').hidden;
