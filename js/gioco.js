@@ -916,7 +916,20 @@ function gestisciFinestre() {
 //  CICLO PRINCIPALE
 // =============================================================================
 let contaFps = 0, tFps = 0;
+//  AL TELEFONO SI RISPARMIA (Gianluca, 30/09/2026: si scaldava dopo due
+//  partite). Trenta fotogrammi invece di sessanta, e in pausa si disegna una
+//  volta sola e poi si sta fermi: il quadro non cambia, ridisegnarlo e' solo
+//  batteria. Al computer non cambia niente.
+const PASSO_TELEFONO = 1000 / 30 - 4;   // -4 ms: un fotogramma in anticipo non ne salta uno
+let pausaDisegnata = false;
+
 function ciclo(ora) {
+  if (window.TOCCO) {
+    if (ora - tPrec < PASSO_TELEFONO) { requestAnimationFrame(ciclo); return; }
+    const ferma = inPausa && !scena && !consegnaAperta && !partitaFinita;
+    if (ferma && pausaDisegnata) { tPrec = ora; requestAnimationFrame(ciclo); return; }
+    pausaDisegnata = ferma;
+  }
   // Il salto va limitato dai due lati: una scheda tornata in primo piano puo'
   // consegnare un dt enorme, e un orologio che arretra ne consegna uno
   // negativo — con quello il tempo di gioco tornava indietro.
