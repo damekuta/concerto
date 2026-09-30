@@ -67,10 +67,11 @@
   const levetta = document.getElementById('levetta');
   const pomello = document.getElementById('pomello');
   //  Piu' sensibile (Gianluca, 30/09/2026, due volte: «si deve muovere troppo il dito»):
-  //  bastano 3 px per partire e l'anello segue il pollice gia' a 15 px, cosi'
+  //  terzo giro, cambio drastico: 1,5 px per partire, l'anello segue il
+  //  pollice gia' a 6 px, cosi'
   //  per cambiare direzione basta un gesto corto. TOCCO_FERMO resta piu'
   //  largo: un tocco appena tremolante deve contare ancora come tocco.
-  const RAGGIO = 15, MORTA = 3, BORDO = 16, TOCCO_FERMO = 8;
+  const RAGGIO = 6, MORTA = 1.5, BORDO = 16, TOCCO_FERMO = 8, VISTA = 15;
 
   // Fuori dal gioco (avvio, finestra delle segnalazioni) lo strato non c'e'.
   const inGioco = () => !document.getElementById('app').hidden;
@@ -160,7 +161,10 @@
       dx *= RAGGIO / d; dy *= RAGGIO / d;
     }
     if (d > TOCCO_FERMO) mosso = true;
-    pomello.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+    //  Il pomello si disegna con uno spostamento piu' grande di quello vero:
+    //  6 px non si vedrebbero sotto il pollice.
+    const V = VISTA / RAGGIO;
+    pomello.style.transform = `translate(calc(-50% + ${dx * V}px), calc(-50% + ${dy * V}px))`;
     applica(direzione(dx, dy));
   });
   //  Il tocco scatta quando il dito si alza e non quando si appoggia: su iOS

@@ -527,6 +527,7 @@ function mescola(a) {
 //  PREPARAZIONE DELLA PARTITA
 // =============================================================================
 function inizializza() {
+  riaccendiAudio();
   G.tempoLimite = notte ? NOTTE.tempoLimite : GIORNO.tempoLimite;
   G.velocitaInseguitore = GIORNO.velocitaInseguitore * (notte ? NOTTE.velocitaAluzzi : 1);
   audio.notte = notte;
@@ -923,7 +924,42 @@ let contaFps = 0, tFps = 0;
 const PASSO_TELEFONO = 1000 / 30 - 4;   // -4 ms: un fotogramma in anticipo non ne salta uno
 let pausaDisegnata = false;
 
+//  A FINE PARTITA L'AUDIO SI SPEGNE DA SOLO (Gianluca, 30/09/2026): chi smette
+//  di giocare e non chiude la pagina si ritrovava la musica accesa anche a
+//  telefono bloccato. Trenta secondi dopo la fine sfuma in quattro e poi il
+//  motore si sospende apposta, cosi' la ripresa automatica non lo riaccende.
+//  Ricominciare (R, N, ↻, ☾) lo riaccende.
+const SPEGNI_DOPO = 30, SFUMA_IN = 4;
+//  cancelScheduledValues non ferma una curva gia' in corso (CLAUDE.md del
+//  modulo): si usa cancelAndHoldAtTime, e dove manca si fissa il valore a mano.
+function fermaCurva(g, t) {
+  if (g.cancelAndHoldAtTime) g.cancelAndHoldAtTime(t);
+  else { const v = g.value; g.cancelScheduledValues(t); g.setValueAtTime(v, t); }
+}
+let fineDa = null, audioSpento = false;
+function spegniAFinePartita() {
+  const ferma = partitaFinita && (!scena || scena.fase === 'fine');
+  if (!ferma) { fineDa = null; return; }
+  if (fineDa === null) fineDa = performance.now();
+  if (audioSpento || !audio.ctx || performance.now() - fineDa < SPEGNI_DOPO * 1000) return;
+  audioSpento = true;
+  const t = audio.ctx.currentTime;
+  fermaCurva(audio.master.gain, t);
+  audio.master.gain.linearRampToValueAtTime(0, t + SFUMA_IN);
+  setTimeout(() => { if (audioSpento) audio.ctx.suspend(); }, SFUMA_IN * 1000 + 100);
+}
+function riaccendiAudio() {
+  fineDa = null;
+  if (!audioSpento || !audio.ctx) return;
+  audioSpento = false;
+  const t = audio.ctx.currentTime;
+  fermaCurva(audio.master.gain, t);
+  audio.master.gain.setValueAtTime(audio.fader ? audio.fader.generale : 1, t);
+  audio.ctx.resume();
+}
+
 function ciclo(ora) {
+  spegniAFinePartita();
   if (window.TOCCO) {
     if (ora - tPrec < PASSO_TELEFONO) { requestAnimationFrame(ciclo); return; }
     const ferma = inPausa && !scena && !consegnaAperta && !partitaFinita;
